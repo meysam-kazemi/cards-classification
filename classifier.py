@@ -31,5 +31,10 @@ valid_loader = DataLoader(valid, batch_size=BATCH_SIZE, shuffle=True, num_worker
 # Classes
 df = pd.read_csv(DATAFRAME_PATH)
 classes = []
-for i in range(52):
+for i in range(53):
   classes.append((df[df['class index']==i]['labels']).iloc[0])
+
+# Save Classes
+with open("classes.txt", "w") as f:
+  for c in classes:
+    f.write(c+"\n")
