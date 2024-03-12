@@ -1,0 +1,4 @@
+cards/
+*.jpg
+*.pth
+*.h5
