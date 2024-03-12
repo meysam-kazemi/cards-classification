@@ -1,11 +1,11 @@
-import os
-import numpy as np
 import pandas as pd
 import torch
-from torch.utils.data import Dataset, DataLoader
-import torchvision 
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+import torchvision
+from torch.utils.data import DataLoader
 from torchvision import transforms
-import matplotlib.pyplot as plt
 
 # Configuration variables
 TRAIN_DATA_PATH = "./cards/train/"
@@ -40,12 +40,7 @@ with open("classes.txt", "w") as f:
     f.write(c+"\n")
 
 
-# Build Model
-import torch.nn.functional as F
-import torch.nn as nn
-import torch.optim as optim
-
-
+# Build model
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
