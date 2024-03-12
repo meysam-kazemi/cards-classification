@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 TRAIN_DATA_PATH = "./cards/train/"
 TEST_DATA_PATH = "./cards/test/"
 VALID_DATA_PATH = "./cards/valid/"
+DATAFRAME_PATH = "./cards/cards.csv"
 BATCH_SIZE = 64
 
 TRANSFORM_IMG = transforms.Compose([
@@ -27,4 +28,8 @@ test_loader  = DataLoader(test, batch_size=BATCH_SIZE, shuffle=True, num_workers
 valid = torchvision.datasets.ImageFolder(VALID_DATA_PATH, transform=TRANSFORM_IMG)
 valid_loader = DataLoader(valid, batch_size=BATCH_SIZE, shuffle=True, num_workers=4)
 
-
+# Classes
+df = pd.read_csv(DATAFRAME_PATH)
+classes = []
+for i in range(52):
+  classes.append((df[df['class index']==i]['labels']).iloc[0])
