@@ -68,4 +68,30 @@ class Net(nn.Module):
 
 net = Net()
 
+# Optimizer
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
+
+# Train Loop
+for epoch in range(20):  # loop over the dataset multiple times
+  running_loss = 0.0
+  for i, data in enumerate(train_loader, 0):
+      # get the inputs; data is a list of [inputs, labels]
+      inputs, labels = data
+
+      # zero the parameter gradients
+      optimizer.zero_grad()
+
+      # forward + backward + optimize
+      outputs = net(inputs)
+      loss = criterion(outputs, labels)
+      loss.backward()
+      optimizer.step()
+
+      # print statistics
+      running_loss += loss.item()
+  print(f'[{epoch + 1} |  loss: {running_loss / 2000:.3f}')
+  running_loss = 0.0
+
+print('Finished Training')
 
