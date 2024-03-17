@@ -45,9 +45,8 @@ class Net(nn.Module):
     def __init__(self):
         super().__init__()
         self.conv1 = nn.Conv2d(3, 6, 5)
-        self.convs2 = nn.Conv2d(6, 6, 5, stride=(2,2))
+        self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
-        self.convs2 = nn.Conv2d(16, 16, 5, stride=(2,2))
         self.fc1 = nn.Linear(16*53*53, 120)
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 53)
@@ -61,6 +60,12 @@ class Net(nn.Module):
         x = self.fc3(x)
         return x
 
+    def block(self, x, input, latent, output, kernel_size):
+      x1 = nn.Conv2d(input, latent, kernel_size)(x)
+      x1 = nn.Conv2d(latent, latent, kernel_size, stride=2)(x1)
+      x1 = nn.Conv2d(latent, output, kernel_size)(x1)
+      x1 = nn.Conv2d(latent, output, kernel_size, stride=2)(x1)
+      return x1
 
 net = Net()
 
