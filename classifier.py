@@ -44,29 +44,39 @@ with open("classes.txt", "w") as f:
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16*53*53, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 53)
-
+        self.blk1 = self.block(3,6,18,5)
+        self.blk2 = self.block(6,12,18,5)
+        self.blk3 = self.block(18,20,22,5)
+        self.fc1 = nn.Linear(100,128)
+        self.fc2 = nn.Linear(128, 256)
+        self.fc3 = nn.Linear(256, 64)
+        self.fc4 = nn.Linear(64, 53)
+        self.act = F.relu
+        
     def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = torch.flatten(x, 1) # flatten all dimensions except batch
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
+        x = self.blk1(x)
+        x = self.blk2(x)
+        x = self.blk3(x)
+
+        x = torch.flatten(x,1)
+        x = self.fc1(x)
+        x = self.act(x)
+        x = self.fc2(x)
+        x = self.act(x)
         x = self.fc3(x)
+        x = self.act(x)
+        x = self.fc4(x)
         return x
 
-    def block(self, x, input, latent, output, kernel_size):
-      x1 = nn.Conv2d(input, latent, kernel_size)(x)
-      x1 = nn.Conv2d(latent, latent, kernel_size, stride=2)(x1)
-      x1 = nn.Conv2d(latent, output, kernel_size)(x1)
-      x1 = nn.Conv2d(latent, output, kernel_size, stride=2)(x1)
-      return x1
-
+    def block(self, input, latent, output, kernel_size):
+      blk = [
+          nn.Conv2d(input, latent, kernel_size),
+          nn.Conv2d(latent, latent, kernel_size, stride=2),
+          nn.Conv2d(latent, output, kernel_size),
+          nn.Conv2d(latent, output, kernel_size, stride=2)
+      ]
+      return blk
+          
 net = Net()
 
 # Optimizer
