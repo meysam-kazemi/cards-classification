@@ -44,19 +44,18 @@ with open("classes.txt", "w") as f:
 class Net(nn.Module):
     def __init__(self):
         super().__init__()
-        self.blk1 = self.block(3,6,18,5)
-        self.blk2 = self.block(6,12,18,5)
-        self.blk3 = self.block(18,20,22,5)
-        self.fc1 = nn.Linear(100,128)
-        self.fc2 = nn.Linear(128, 256)
+        self.blk1 = self.block(3,6,9,5)
+        self.blk2 = self.block(9,12,18,3)
+        # self.blk3 = self.block(18,20,22,3)
+        self.fc1 = nn.Linear(1800,512)
+        self.fc2 = nn.Linear(512, 256)
         self.fc3 = nn.Linear(256, 64)
         self.fc4 = nn.Linear(64, 53)
         self.act = F.relu
-        
+
     def forward(self, x):
         x = self.blk1(x)
         x = self.blk2(x)
-        x = self.blk3(x)
 
         x = torch.flatten(x,1)
         x = self.fc1(x)
@@ -69,15 +68,15 @@ class Net(nn.Module):
         return x
 
     def block(self, input, latent, output, kernel_size):
-      blk = [
+      blk = nn.Sequential(
           nn.Conv2d(input, latent, kernel_size),
           nn.Conv2d(latent, latent, kernel_size, stride=2),
           nn.Conv2d(latent, output, kernel_size),
-          nn.Conv2d(latent, output, kernel_size, stride=2)
-      ]
+          nn.Conv2d(output, output, kernel_size, stride=2)
+      )
       return blk
           
-net = Net()
+net = Net().to(device)
 
 # Optimizer
 criterion = nn.CrossEntropyLoss()
