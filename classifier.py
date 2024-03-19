@@ -41,7 +41,8 @@ with open("classes.txt", "w") as f:
 
 # Set Device
 device = "cuda" if torch.cuda.is_available() else "cpu"
-print(f"{"device = "+device:-^40}")
+print("\033[33m"+"device".center(25,"-")+"\033[00m")
+print(device.center(25))
 
 
 # Build model
