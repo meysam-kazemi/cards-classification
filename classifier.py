@@ -88,12 +88,17 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
 
 # Train Loop
-for epoch in range(500):  # loop over the dataset multiple times
+# @title
+best_vloss = 1_000_000.
+
+for epoch in range(700):  # loop over the dataset multiple times
   running_loss = 0.0
   for i, data in enumerate(train_loader, 0):
       # get the inputs; data is a list of [inputs, labels]
       inputs, labels = data
       inputs, labels = inputs.to(device), labels.to(device)
+
+      net.train(True)
 
       # zero the parameter gradients
       optimizer.zero_grad()
@@ -106,8 +111,27 @@ for epoch in range(500):  # loop over the dataset multiple times
 
       # print statistics
       running_loss += loss.item()
-  print(f'epoch : {epoch + 1} - loss: {running_loss / 2000:.3f}')
-  running_loss = 0.0
+
+  avg_loss = running_loss/(i+1)
+
+  # Valid Data
+  net.eval()
+  running_vloss = 0.
+  with torch.no_grad():
+    for i, vdata in enumerate(valid_loader):
+        vinputs, vlabels = vdata
+        vinput, vlabels = vinput.to(device), vlabels.to(device)
+        voutputs = net(vinputs)
+        vloss = criterion(voutputs, vlabels)
+        running_vloss += vloss
+  avg_vloss = running_vloss / (i + 1)
+
+  print(f'Epoch : [{epoch}] | LOSS train {avg_loss} valid {avg_vloss}')
+
+  if avg_vloss < best_vloss:
+    best_vloss = avg_vloss
+    model_path = 'model_{}.pth'.format(epoch)
+    torch.save(net.state_dict(), model_path)
 
 print('Finished Training')
 
