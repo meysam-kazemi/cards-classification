@@ -135,3 +135,58 @@ for epoch in range(700):  # loop over the dataset multiple times
 
 print('Finished Training')
 
+
+# load model and train it
+net = Net().to(device)
+net.load_state_dict(torch.load("model_24.pth"))
+
+best_vloss = 1_000_000.
+
+for epoch in range(25,700):  # loop over the dataset multiple times
+  running_loss = 0.0
+  running_acc = 0.0
+  for i, data in enumerate(train_loader):
+      # get the inputs; data is a list of [inputs, labels]
+      inputs, labels = data
+      inputs, labels = inputs.to(device), labels.to(device)
+
+      net.train(True)
+
+      # zero the parameter gradients
+      optimizer.zero_grad()
+
+      # forward + backward + optimize
+      outputs = net(inputs)
+      loss = criterion(outputs, labels)
+      loss.backward()
+      optimizer.step()
+
+      # print statistics
+      running_loss += loss.item()
+
+      acc = torch.sum(torch.argmax(outputs,1) == labels)/(len(labels))
+      running_acc += acc
+
+  avg_loss = running_loss/(i+1)
+  avg_acc = running_acc/(i+1)
+
+  # Valid Data
+  net.eval()
+  running_vloss = 0.
+  with torch.no_grad():
+    for i, vdata in enumerate(valid_loader):
+        vinputs, vlabels = vdata
+        vinputs, vlabels = vinputs.to(device), vlabels.to(device)
+        voutputs = net(vinputs)
+        vloss = criterion(voutputs, vlabels)
+        running_vloss += vloss
+  avg_vloss = running_vloss / (i + 1)
+
+  print(f'Epoch : [{epoch}] | LOSS train {avg_loss:.3f} | valid {avg_vloss:.3f} | ACCURACY {acc}')
+
+  if avg_vloss < best_vloss:
+    best_vloss = avg_vloss
+    model_path = 'model_{}.pth'.format(epoch)
+    torch.save(net.state_dict(), model_path)
+
+print('Finished Training')
